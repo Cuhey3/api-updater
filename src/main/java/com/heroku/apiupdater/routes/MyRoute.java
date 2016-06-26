@@ -1,7 +1,6 @@
 package com.heroku.apiupdater.routes;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.Message;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.rx.ReactiveCamel;
 import org.springframework.beans.factory.annotation.Autowired;
