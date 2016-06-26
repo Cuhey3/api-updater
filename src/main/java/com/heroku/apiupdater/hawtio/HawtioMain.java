@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class HawtioMain {
 
     public HawtioMain() throws Exception {
-        String env = System.getenv("MONGOLAB_URI");
+        String env = System.getenv("MONGODB_URI");
         if (env == null) {
             env = System.getenv("API_UPDATER_MONGOLAB_URI");
         }
