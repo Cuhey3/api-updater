@@ -10,30 +10,32 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MongoConfig {
 
-  public String ownMongoUri, masterMongoUri, snapshotMongoUri;
-  public Document ownSettings, masterSettings;
-  public MongoClient snapshotClient;
+  public String ownMongoDatabaseName, masterDatabaseName, snapshotDatabaseName;
+  public Document masterSettings;
+  public MongoClient snapshotClient, masterClient;
 
   public MongoConfig() {
-    ownMongoUri = System.getenv("MONGODB_URI");
+    String ownMongoUri = System.getenv("MONGODB_URI");
     if (ownMongoUri == null) {
       ownMongoUri = System.getenv("API_UPDATER_MONGOLAB_URI");
     }
-    ownSettings = getSettings(ownMongoUri);
-    masterMongoUri
-            = ownSettings.get("MASTER_MONGOLAB_URI", String.class);
+    ownMongoDatabaseName = getDatabaseName(ownMongoUri);
+    String masterMongoUri
+            = getSettings(ownMongoUri).get("MASTER_MONGOLAB_URI", String.class);
 
     masterSettings = getSettings(masterMongoUri);
+    masterClient = new MongoClient(new MongoClientURI(masterMongoUri));
+    masterDatabaseName = getDatabaseName(masterMongoUri);
 
-    snapshotMongoUri
+    String snapshotMongoUri
             = masterSettings.get("SNAPSHOT_MONGOLAB_URI", String.class);
-
+    snapshotDatabaseName = getDatabaseName(snapshotMongoUri);
     snapshotClient = new MongoClient(new MongoClientURI(snapshotMongoUri));
   }
 
   @Bean(name = "master")
   public MongoClient masterMongoClient() {
-    return new MongoClient(new MongoClientURI(masterMongoUri));
+    return masterClient;
   }
 
   @Bean(name = "snapshot")
@@ -41,9 +43,13 @@ public class MongoConfig {
     return snapshotClient;
   }
 
-  public final String getDatabaseName(String mongoUri) {
-    String[] split = mongoUri.split("/");
-    return split[split.length - 1];
+  private String getDatabaseName(String mongoUri) {
+    if (mongoUri == null) {
+      return null;
+    } else {
+      String[] split = mongoUri.split("/");
+      return split[split.length - 1];
+    }
   }
 
   public final Document getSettings(String mongoUri) {

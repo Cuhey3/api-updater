@@ -1,7 +1,6 @@
 package com.heroku.apiupdater.sources.polling;
 
 import com.heroku.apiupdater.definition.mongo.MongoConfig;
-import com.heroku.apiupdater.definition.mongo.SnapshotMongoClient;
 import com.heroku.apiupdater.sources.content.MediawikiApiRequest;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +21,7 @@ public class FemaleSeiyuCategoryMembers extends RouteBuilder {
   @Override
   public void configure() throws Exception {
     fromF("timer:%s?period=173s&delay=173s", collectionName)
+            .routeId(collectionName)
             .process((Exchange exchange) -> {
               List<Map<String, Object>> mapList
                       = new MediawikiApiRequest()
@@ -44,7 +44,7 @@ public class FemaleSeiyuCategoryMembers extends RouteBuilder {
               exchange.getIn().setBody(document);
             })
             .toF("mongodb:snapshot?database=%s&collection=%s&operation=insert",
-                    config.getDatabaseName(config.snapshotMongoUri),
+                    config.snapshotDatabaseName,
                     collectionName);
   }
 }

@@ -1,7 +1,6 @@
 package com.heroku.apiupdater.sources.polling;
 
 import com.heroku.apiupdater.definition.mongo.MongoConfig;
-import com.heroku.apiupdater.definition.mongo.SnapshotMongoClient;
 import com.heroku.apiupdater.sources.content.MediawikiApiRequest;
 import java.util.Date;
 import java.util.List;
@@ -14,14 +13,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MaleSeiyuCategoryMembers extends RouteBuilder {
-  
+
   final String collectionName = "snapshot_male_seiyu_category_members";
   @Autowired
   MongoConfig config;
-  
+
   @Override
   public void configure() throws Exception {
     fromF("timer:%s?period=191s&delay=191s", collectionName)
+            .routeId(collectionName)
             .process((Exchange exchange) -> {
               List<Map<String, Object>> mapList
                       = new MediawikiApiRequest()
@@ -36,7 +36,7 @@ public class MaleSeiyuCategoryMembers extends RouteBuilder {
                       .setContinueElementName("cmcontinue")
                       .setIgnoreFields("ns")
                       .getResultByMapList();
-              
+
               mapList.forEach((m) -> m.put("gender", "m"));
               Document document = new Document();
               document.put("data", mapList);
@@ -44,7 +44,7 @@ public class MaleSeiyuCategoryMembers extends RouteBuilder {
               exchange.getIn().setBody(document);
             })
             .toF("mongodb:snapshot?database=%s&collection=%s&operation=insert",
-                    config.getDatabaseName(config.snapshotMongoUri),
+                    config.snapshotDatabaseName,
                     collectionName);
   }
 }

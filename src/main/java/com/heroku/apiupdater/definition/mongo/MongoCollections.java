@@ -1,7 +1,5 @@
 package com.heroku.apiupdater.definition.mongo;
 
-import com.heroku.apiupdater.definition.mongo.MongoConfig;
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 import java.util.List;
@@ -11,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,8 +21,8 @@ public class MongoCollections {
 
   private void createSnapshotCollections(MongoConfig config) {
     MongoDatabase snapshotDatabase
-            = config.snapshotClient.getDatabase(
-                    config.getDatabaseName(config.snapshotMongoUri));
+            = config.snapshotClient
+            .getDatabase(config.snapshotDatabaseName);
 
     Set<String> existCollectionNames
             = StreamSupport.stream(
